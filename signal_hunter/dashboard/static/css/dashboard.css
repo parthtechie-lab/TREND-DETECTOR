@@ -230,10 +230,12 @@ body {
   font-size: 0.78rem; color: var(--c-text-2); margin-top: 2px;
 }
 .metric-card__trend {
-  position: absolute; bottom: var(--sp-4); right: var(--sp-4);
   font-size: 0.7rem; color: var(--c-text-3);
   font-family: var(--font-mono);
+  margin-top: 4px;
+  display: block;
 }
+
 
 /* ── Section ────────────────────────────────────────────────────────────────── */
 .section {
