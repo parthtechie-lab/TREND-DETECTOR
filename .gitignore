@@ -1,0 +1,18 @@
+# Databases
+*.db
+*.db.bak
+
+# Python Caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual Environment
+signal_hunter/venv/
+venv/
+
+# Environment configurations
+.env
+
+# Incidents
+.ase-incidents/

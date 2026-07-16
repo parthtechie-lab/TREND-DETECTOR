@@ -1,0 +1,79 @@
+{
+  "name": "INFORAMTION",
+  "version": "1.0.0",
+  "description": "One-paragraph description of what this project does and who it serves.",
+  "tech_stack": [
+    "Next.js 15 (App Router)",
+    "TypeScript 5.5",
+    "PostgreSQL 16 via Drizzle ORM",
+    "Tailwind CSS v4",
+    "Vercel Deployment"
+  ],
+  "conventions": [
+    "All components use named exports, never default exports",
+    "Database queries live exclusively in /lib/db/*.ts",
+    "API routes use Route Handlers in /app/api/**/*.ts",
+    "Zod schemas validate all external input"
+  ],
+  "architecture_patterns": [
+    "Server Components for data fetching, Client Components for interactivity only",
+    "Repository pattern for database access",
+    "Feature-based folder structure under /features"
+  ],
+  "file_structure": {
+    "src/app": "Next.js App Router pages and layouts",
+    "src/features": "Feature modules with co-located components, hooks, and types",
+    "src/lib": "Shared utilities, database client, auth helpers",
+    "src/components/ui": "Reusable UI primitives (Button, Modal, Input)",
+    "tests": "Test files mirroring src/ structure"
+  },
+  "testing_strategy": {
+    "framework": "Vitest + React Testing Library",
+    "coverage_target": "80%",
+    "patterns": [
+      "Unit tests for all utility functions",
+      "Integration tests for API routes",
+      "Component tests for interactive UI elements"
+    ]
+  },
+  "deployment": {
+    "platform": "Vercel",
+    "branch_strategy": "main → production, dev → preview",
+    "environments": [
+      "development",
+      "staging",
+      "production"
+    ]
+  },
+  "sprint_focus": "Building the user onboarding flow with email verification and profile setup.",
+  "sprint_skills": [
+    "lifecycle/security-and-hardening",
+    "lifecycle/api-and-interface-design",
+    "lifecycle/test-driven-development"
+  ],
+  "never_do": [
+    "Never use useEffect for data fetching — use Server Components or SWR",
+    "Never store secrets in .env files committed to git",
+    "Never use inline styles — always use Tailwind classes",
+    "Never use `any` TypeScript type — always type explicitly",
+    "Never mix database queries into React components"
+  ],
+  "preferred_patterns": [
+    "Use Zod for all schema validation",
+    "Use Drizzle ORM for all database access",
+    "Use server actions for mutations",
+    "Use Next.js Image component for all images"
+  ],
+  "agent_skills": {
+    "directory": "/home/thor/skiils",
+    "default_skills": [
+      "lifecycle/using-agent-skills",
+      "lifecycle/context-engineering"
+    ],
+    "mandatory_skills": {
+      "api": "lifecycle/api-and-interface-design",
+      "auth": "lifecycle/security-and-hardening"
+    },
+    "session_reporting_preference": true
+  }
+}

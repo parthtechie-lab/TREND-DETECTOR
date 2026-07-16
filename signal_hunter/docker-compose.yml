@@ -1,0 +1,106 @@
+version: "3.9"
+
+services:
+  # ── Signal Hunter AI Application ─────────────────────────────────────────────
+  signal-hunter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: signal-hunter
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"   # Dashboard
+      - "9090:9090"   # Prometheus metrics
+    volumes:
+      - ./signal_hunter.db:/app/signal_hunter.db
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+    environment:
+      # Override DATABASE_URL for container-to-container networking if using Postgres
+      # DATABASE_URL: postgresql+asyncpg://signal:signal@postgres:5432/signal_hunter
+      PYTHONUNBUFFERED: "1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - signal-net
+
+  # ── Redis (for future distributed queue support) ────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: signal-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - signal-net
+
+  # ── Prometheus ────────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: signal-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9091:9090"   # Prometheus UI (avoid collision with app metrics)
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+    networks:
+      - signal-net
+
+  # ── Grafana ───────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: signal-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=signalhunter
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3000:3000"   # Grafana UI
+    depends_on:
+      - prometheus
+    networks:
+      - signal-net
+
+  # ── Optional: PostgreSQL (uncomment for production) ───────────────────────────
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: signal-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: signal
+  #     POSTGRES_PASSWORD: signal
+  #     POSTGRES_DB: signal_hunter
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - signal-net
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  # postgres-data:
+
+networks:
+  signal-net:
+    driver: bridge

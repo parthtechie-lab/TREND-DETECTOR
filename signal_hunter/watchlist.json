@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "schema_version": "2.0.0",
+    "description": "Signal Hunter AI — Master Configuration. Defines target sources, categories, priority weights, and quiet hours.",
+    "last_updated": "2026-07-14"
+  },
+  "subreddits": [
+    "SaaS",
+    "startups",
+    "artificial",
+    "MachineLearning",
+    "Entrepreneur",
+    "ProductHunter",
+    "webdev"
+  ],
+  "youtube_queries": [
+    "AI tools 2026",
+    "SaaS startup launch",
+    "new AI software",
+    "tech product launch 2026"
+  ],
+
+  "categories": [
+    "AI_TOOL",
+    "SAAS",
+    "HARDWARE",
+    "MEME",
+    "OTHER"
+  ],
+  "matching_rules": {
+    "min_reliability_score": 5,
+    "dedup_window_hours": 48,
+    "confidence_threshold_alert": 0.8,
+    "confidence_threshold_store": 0.5
+  },
+  "quiet_hours": {
+    "start": "22:00",
+    "end": "08:00",
+    "timezone": "Asia/Kolkata",
+    "bypass_for_high_priority": true
+  }
+}

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signal Hunter AI — Market Intelligence Dashboard</title>
+  <meta name="description" content="Unified Market Intelligence & Trend Detection System. Real-time signal monitoring across Reddit, YouTube, Product Hunt, and TikTok." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- ── Animated Background ─────────────────────────────────────────────── -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--2" aria-hidden="true"></div>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="header" role="banner">
+    <div class="header__inner">
+      <div class="header__brand">
+        <div class="header__logo" aria-label="Signal Hunter AI logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" stroke="url(#grad1)" stroke-width="2"/>
+            <circle cx="16" cy="16" r="8" stroke="url(#grad1)" stroke-width="1.5" opacity="0.6"/>
+            <circle cx="16" cy="16" r="3" fill="url(#grad1)"/>
+            <line x1="16" y1="2" x2="16" y2="6" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="30" y1="16" x2="26" y2="16" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="16" y1="30" x2="16" y2="26" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="2" y1="16" x2="6" y2="16" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="grad1" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="header__title">Signal Hunter <span class="header__title-ai">AI</span></h1>
+          <p class="header__subtitle">Market Intelligence &amp; Trend Detection</p>
+        </div>
+      </div>
+
+      <div class="header__status">
+        <div class="status-badge" id="ws-status" role="status" aria-live="polite">
+          <span class="status-badge__dot status-badge__dot--connecting" id="ws-dot"></span>
+          <span id="ws-label">Connecting…</span>
+        </div>
+        <div class="header__time" id="current-time" aria-label="Current time"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main class="main" role="main">
+
+    <!-- ── Metrics Row ──────────────────────────────────────────────────── -->
+    <section class="metrics-row" aria-label="System metrics">
+      <div class="metric-card metric-card--primary" id="card-items-total">
+        <div class="metric-card__icon">📡</div>
+        <div class="metric-card__body">
+          <div class="metric-card__value" id="metric-items-total">0</div>
+          <div class="metric-card__label">Items Ingested</div>
+        </div>
+        <div class="metric-card__trend" id="trend-items">+0/min</div>
+      </div>
+      <div class="metric-card metric-card--success" id="card-alerts-sent">
+        <div class="metric-card__icon">🚨</div>
+        <div class="metric-card__body">
+          <div class="metric-card__value" id="metric-alerts">0</div>
+          <div class="metric-card__label">Alerts Sent</div>
+        </div>
+        <div class="metric-card__trend" id="trend-alerts">0 realtime</div>
+      </div>
+      <div class="metric-card metric-card--warning" id="card-rejections">
+        <div class="metric-card__icon">🛡️</div>
+        <div class="metric-card__body">
+          <div class="metric-card__value" id="metric-rejections">0</div>
+          <div class="metric-card__label">Hallucinations Blocked</div>
+        </div>
+        <div class="metric-card__trend" id="trend-rej">Evidence validation</div>
+      </div>
+      <div class="metric-card metric-card--info" id="card-clusters">
+        <div class="metric-card__icon">🔗</div>
+        <div class="metric-card__body">
+          <div class="metric-card__value" id="metric-clusters">0</div>
+          <div class="metric-card__label">Unique Clusters</div>
+        </div>
+        <div class="metric-card__trend" id="trend-clusters">Semantic groups</div>
+      </div>
+    </section>
+
+    <!-- ── Queue Depth ──────────────────────────────────────────────────── -->
+    <section class="section" aria-label="Queue depths">
+      <div class="section__header">
+        <h2 class="section__title">⚡ Pipeline Queue Depth</h2>
+        <span class="section__badge" id="queue-updated">Live</span>
+      </div>
+      <div class="queue-bars">
+        <div class="queue-bar-item">
+          <div class="queue-bar-item__header">
+            <span class="queue-bar-item__label">Raw Ingestion</span>
+            <span class="queue-bar-item__value" id="q-raw-val">0</span>
+          </div>
+          <div class="queue-bar-track">
+            <div class="queue-bar-fill queue-bar-fill--raw" id="q-raw-bar" style="width:0%" role="progressbar" aria-valuenow="0" aria-valuemax="500"></div>
+          </div>
+          <div class="queue-bar-item__sub">max 500</div>
+        </div>
+        <div class="queue-bar-item">
+          <div class="queue-bar-item__header">
+            <span class="queue-bar-item__label">Post-Dedup</span>
+            <span class="queue-bar-item__value" id="q-unique-val">0</span>
+          </div>
+          <div class="queue-bar-track">
+            <div class="queue-bar-fill queue-bar-fill--unique" id="q-unique-bar" style="width:0%" role="progressbar" aria-valuenow="0" aria-valuemax="200"></div>
+          </div>
+          <div class="queue-bar-item__sub">max 200</div>
+        </div>
+        <div class="queue-bar-item">
+          <div class="queue-bar-item__header">
+            <span class="queue-bar-item__label">AI Scored</span>
+            <span class="queue-bar-item__value" id="q-scored-val">0</span>
+          </div>
+          <div class="queue-bar-track">
+            <div class="queue-bar-fill queue-bar-fill--scored" id="q-scored-bar" style="width:0%" role="progressbar" aria-valuenow="0" aria-valuemax="200"></div>
+          </div>
+          <div class="queue-bar-item__sub">max 200</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Analytics Row ────────────────────────────────────────────────── -->
+    <section class="analytics-row" aria-label="System telemetry charts">
+      <div class="chart-card">
+        <h3 class="chart-card__title">🤖 Category Breakdown</h3>
+        <div class="chart-card__canvas-wrapper">
+          <canvas id="chart-categories"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-card__title">🛡️ Grounding Rejection Rate</h3>
+        <div class="chart-card__canvas-wrapper">
+          <canvas id="chart-rejections"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-card__title">📈 Signal Confidence Spread</h3>
+        <div class="chart-card__canvas-wrapper">
+          <canvas id="chart-confidence"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Two Column Layout ────────────────────────────────────────────── -->
+    <div class="two-col">
+
+      <!-- ── Source Health ──────────────────────────────────────────────── -->
+      <section class="section" aria-label="Source health">
+        <div class="section__header">
+          <h2 class="section__title">📡 Source Health</h2>
+          <button class="btn-refresh" id="btn-refresh-sources" aria-label="Refresh source health">↺</button>
+        </div>
+        <div class="source-grid" id="source-grid" role="list">
+          <!-- populated by JS -->
+          <div class="source-card source-card--loading" role="listitem">
+            <div class="skeleton skeleton--line"></div>
+            <div class="skeleton skeleton--line skeleton--short"></div>
+          </div>
+          <div class="source-card source-card--loading" role="listitem">
+            <div class="skeleton skeleton--line"></div>
+            <div class="skeleton skeleton--line skeleton--short"></div>
+          </div>
+          <div class="source-card source-card--loading" role="listitem">
+            <div class="skeleton skeleton--line"></div>
+            <div class="skeleton skeleton--line skeleton--short"></div>
+          </div>
+          <div class="source-card source-card--loading" role="listitem">
+            <div class="skeleton skeleton--line"></div>
+            <div class="skeleton skeleton--line skeleton--short"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Recent Alerts ──────────────────────────────────────────────── -->
+      <section class="section" aria-label="Recent alerts">
+        <div class="section__header">
+          <h2 class="section__title">🚨 Recent Alerts</h2>
+          <span class="section__badge section__badge--pulse" id="alert-count-badge">0</span>
+        </div>
+        <div class="alerts-list" id="alerts-list" role="log" aria-live="polite" aria-label="Alert feed">
+          <div class="empty-state">
+            <div class="empty-state__icon">🔍</div>
+            <div class="empty-state__text">Hunting for signals…</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── Signal Feed ──────────────────────────────────────────────────── -->
+    <section class="section section--full" aria-label="Signal feed">
+      <div class="section__header">
+        <h2 class="section__title">📊 Signal Feed</h2>
+        <div class="feed-controls">
+          <select class="feed-filter" id="filter-category" aria-label="Filter by category">
+            <option value="">All Categories</option>
+            <option value="AI_TOOL">🤖 AI Tool</option>
+            <option value="SAAS">💼 SaaS</option>
+            <option value="HARDWARE">🔩 Hardware</option>
+            <option value="MEME">😂 Meme</option>
+            <option value="OTHER">📦 Other</option>
+          </select>
+          <select class="feed-filter" id="filter-source" aria-label="Filter by source">
+            <option value="">All Sources</option>
+            <option value="reddit">Reddit</option>
+            <option value="youtube">YouTube</option>
+            <option value="product_hunt">Product Hunt</option>
+            <option value="hacker_news">Hacker News</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+          <label class="toggle-label">
+            <input type="checkbox" id="filter-corroborated" class="toggle-input" />
+            <span class="toggle-track"></span>
+            Corroborated only
+          </label>
+        </div>
+      </div>
+      <div class="signal-table-wrapper" role="region" aria-label="Signal data table">
+        <table class="signal-table" id="signal-table" aria-label="Signal items">
+          <thead>
+            <tr>
+              <th scope="col">Confidence</th>
+              <th scope="col">Product</th>
+              <th scope="col">Category</th>
+              <th scope="col">Source</th>
+              <th scope="col">Evidence</th>
+              <th scope="col">Corroborated</th>
+              <th scope="col">Time</th>
+            </tr>
+          </thead>
+          <tbody id="signal-tbody">
+            <tr class="signal-row--loading">
+              <td colspan="7">
+                <div class="loading-spinner" aria-label="Loading signals">
+                  <div class="spinner"></div>
+                  <span>Loading signals…</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Toast Container ─────────────────────────────────────────────────── -->
+  <div class="toast-container" id="toast-container" role="region" aria-label="Notifications" aria-live="assertive"></div>
+
+  <!-- ── Collapsible Log Console ─────────────────────────────────────────── -->
+  <div class="console-drawer" id="console-drawer">
+    <button class="console-drawer__toggle" id="btn-toggle-console" aria-label="Toggle live console logs">
+      <span>🖥️ Live System Console Logs</span>
+      <span class="console-drawer__arrow" id="console-arrow">▲</span>
+    </button>
+    <div class="console-drawer__content" id="console-content">
+      <div class="console-logs" id="console-logs" role="log" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
