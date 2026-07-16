@@ -23,7 +23,7 @@ from signal_hunter.ingestion.base import RawItem, SourcePoller
 
 logger = logging.getLogger(__name__)
 
-_POSTS_PER_LISTING: int = 25
+_POSTS_PER_LISTING: int = 50
 _RATE_LIMIT_SLEEP: int = 60  # seconds to sleep on HTTP 429
 
 

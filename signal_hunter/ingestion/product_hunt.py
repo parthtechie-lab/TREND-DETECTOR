@@ -51,7 +51,7 @@ query TodaysPosts($first: Int!) {
 }
 """
 
-_POSTS_PER_CYCLE: int = 30
+_POSTS_PER_CYCLE: int = 60
 
 
 def _make_external_id(slug: str) -> str:

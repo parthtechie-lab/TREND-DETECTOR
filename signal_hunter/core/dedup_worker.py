@@ -20,14 +20,15 @@ from sqlalchemy import select
 from signal_hunter.core.queue import raw_items_queue, push_unique
 from signal_hunter.core.database import AsyncSessionLocal, RawItem, UniqueCluster
 from signal_hunter.dedup.exact import ExactDeduplicator
-from signal_hunter.dedup.semantic import SemanticDeduplicator
+from signal_hunter.dedup.semantic import semantic_deduplicator
 from signal_hunter.core.observability import items_deduped_exact_total, items_deduped_semantic_total
 
 logger = logging.getLogger(__name__)
 
 # Singletons for deduplication processes
 exact_dedup = ExactDeduplicator(max_size=50000)
-semantic_dedup = SemanticDeduplicator()
+semantic_dedup = semantic_deduplicator
+
 
 
 async def dedup_worker() -> None:

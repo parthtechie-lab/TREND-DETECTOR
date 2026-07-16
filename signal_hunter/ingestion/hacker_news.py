@@ -21,8 +21,9 @@ from signal_hunter.ingestion.base import RawItem, SourcePoller
 logger = logging.getLogger(__name__)
 
 _NEW_STORIES_URL = "https://hacker-news.firebaseio.com/v0/newstories.json"
+_SHOW_STORIES_URL = "https://hacker-news.firebaseio.com/v0/showstories.json"
 _ITEM_URL_TEMPLATE = "https://hacker-news.firebaseio.com/v0/item/{item_id}.json"
-_MAX_STORIES_PER_CYCLE: int = 30
+_MAX_STORIES_PER_CYCLE: int = 100
 _REQUEST_TIMEOUT_SECONDS: int = 15
 
 # Keywords for topic pre-filtering. Only stories matching at least one keyword
@@ -87,25 +88,47 @@ class HackerNewsPoller(SourcePoller):
         seen_ids: Set[int] = set()
 
         async with aiohttp.ClientSession(timeout=timeout) as session:
+            new_ids = []
+            show_ids = []
             try:
                 # Fetch new story IDs
                 async with session.get(_NEW_STORIES_URL) as response:
-                    if response.status != 200:
+                    if response.status == 200:
+                        new_ids = await response.json()
+                    else:
                         logger.error(
                             "[hacker_news] Failed to fetch new stories list: HTTP %d",
                             response.status,
                         )
-                        return
-                    story_ids = await response.json()
+
+                # Fetch Show HN story IDs (contains direct product launches)
+                async with session.get(_SHOW_STORIES_URL) as response:
+                    if response.status == 200:
+                        show_ids = await response.json()
+                    else:
+                        logger.error(
+                            "[hacker_news] Failed to fetch show stories list: HTTP %d",
+                            response.status,
+                        )
             except Exception as e:
-                logger.error("[hacker_news] Exception fetching new stories: %s", e)
+                logger.error("[hacker_news] Exception fetching story lists: %s", e)
                 return
 
-            if not story_ids:
+            if not new_ids and not show_ids:
                 return
 
-            # Target only the most recent N stories
-            target_ids = story_ids[:_MAX_STORIES_PER_CYCLE]
+            # Combine and interleave Show HN (typically higher product signal) and new stories.
+            # We put Show HN stories first, then normal new stories, preventing duplicates.
+            combined_ids = []
+            seen_combined = set()
+            for item_id in (show_ids or []) + (new_ids or []):
+                if item_id not in seen_combined:
+                    seen_combined.add(item_id)
+                    combined_ids.append(item_id)
+
+            # Target only the most recent N stories from the merged set
+            target_ids = combined_ids[:_MAX_STORIES_PER_CYCLE]
+
             
             # Fetch details in parallel
             tasks = [self._fetch_item(session, item_id) for item_id in target_ids]

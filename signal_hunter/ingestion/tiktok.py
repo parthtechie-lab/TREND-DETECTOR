@@ -32,7 +32,7 @@ from signal_hunter.ingestion.base import RawItem, SourcePoller
 logger = logging.getLogger(__name__)
 
 _TIKTOK_TRENDING_URL = "https://www.tiktok.com/trending"
-_MAX_VIDEOS: int = 5
+_MAX_VIDEOS: int = 15
 _PAGE_TIMEOUT_MS: int = 30_000      # wait for page load
 _ELEMENT_TIMEOUT_MS: int = 15_000   # wait for video cards
 _CAPTCHA_SELECTOR = "iframe[src*='captcha']"

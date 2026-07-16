@@ -22,7 +22,7 @@ from signal_hunter.ingestion.base import RawItem, SourcePoller
 logger = logging.getLogger(__name__)
 
 _BASE_URL = "https://www.googleapis.com/youtube/v3/search"
-_MAX_RESULTS_PER_QUERY: int = 10
+_MAX_RESULTS_PER_QUERY: int = 20
 _REQUEST_TIMEOUT_SECONDS: int = 30
 
 
