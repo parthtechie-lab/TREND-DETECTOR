@@ -560,15 +560,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize Category Breakdown Doughnut Chart
   const ctxCategories = document.getElementById("chart-categories").getContext("2d");
+  
+  // Custom glowing gradients for categories
+  const gradAI = ctxCategories.createLinearGradient(0, 0, 0, 160);
+  gradAI.addColorStop(0, '#818cf8');
+  gradAI.addColorStop(1, '#6366f1');
+
+  const gradSaaS = ctxCategories.createLinearGradient(0, 0, 0, 160);
+  gradSaaS.addColorStop(0, '#22d3ee');
+  gradSaaS.addColorStop(1, '#06b6d4');
+
+  const gradHw = ctxCategories.createLinearGradient(0, 0, 0, 160);
+  gradHw.addColorStop(0, '#fbbf24');
+  gradHw.addColorStop(1, '#f59e0b');
+
+  const gradMeme = ctxCategories.createLinearGradient(0, 0, 0, 160);
+  gradMeme.addColorStop(0, '#f87171');
+  gradMeme.addColorStop(1, '#ef4444');
+
+  const gradOther = ctxCategories.createLinearGradient(0, 0, 0, 160);
+  gradOther.addColorStop(0, '#94a3b8');
+  gradOther.addColorStop(1, '#475569');
+
   const chartCategories = new Chart(ctxCategories, {
     type: 'doughnut',
     data: {
       labels: ['AI Tool', 'SaaS', 'Hardware', 'Meme', 'Other'],
       datasets: [{
         data: [0, 0, 0, 0, 0],
-        backgroundColor: ['#6366f1', '#06b6d4', '#f59e0b', '#ef4444', '#475569'],
-        borderWidth: 1,
-        borderColor: '#0d1220'
+        backgroundColor: [gradAI, gradSaaS, gradHw, gradMeme, gradOther],
+        borderWidth: 1.5,
+        borderColor: '#0b0f19'
       }]
     },
     options: {
@@ -577,7 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
       plugins: {
         legend: {
           position: 'right',
-          labels: { color: '#94a3b8', font: { size: 9, family: 'Inter' } }
+          labels: { color: '#94a3b8', font: { size: 9, family: 'Outfit' } }
         }
       }
     }
@@ -585,15 +607,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize Grounding Rejection Rate Pie Chart
   const ctxRejections = document.getElementById("chart-rejections").getContext("2d");
+  
+  const gradGreen = ctxRejections.createLinearGradient(0, 0, 0, 160);
+  gradGreen.addColorStop(0, '#34d399');
+  gradGreen.addColorStop(1, '#10b981');
+
+  const gradRed = ctxRejections.createLinearGradient(0, 0, 0, 160);
+  gradRed.addColorStop(0, '#f87171');
+  gradRed.addColorStop(1, '#ef4444');
+
   const chartRejections = new Chart(ctxRejections, {
     type: 'pie',
     data: {
       labels: ['Grounded', 'Hallucinated'],
       datasets: [{
         data: [1, 0],
-        backgroundColor: ['#10b981', '#ef4444'],
-        borderWidth: 1,
-        borderColor: '#0d1220'
+        backgroundColor: [gradGreen, gradRed],
+        borderWidth: 1.5,
+        borderColor: '#0b0f19'
       }]
     },
     options: {
@@ -602,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
       plugins: {
         legend: {
           position: 'right',
-          labels: { color: '#94a3b8', font: { size: 9, family: 'Inter' } }
+          labels: { color: '#94a3b8', font: { size: 9, family: 'Outfit' } }
         }
       }
     }
@@ -610,6 +641,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize Confidence Distribution Bar Chart
   const ctxConfidence = document.getElementById("chart-confidence").getContext("2d");
+  
+  const gradBar = ctxConfidence.createLinearGradient(0, 0, 0, 160);
+  gradBar.addColorStop(0, 'rgba(99, 102, 241, 0.65)');
+  gradBar.addColorStop(1, 'rgba(99, 102, 241, 0.15)');
+
   const chartConfidence = new Chart(ctxConfidence, {
     type: 'bar',
     data: {
@@ -617,12 +653,13 @@ document.addEventListener("DOMContentLoaded", () => {
       datasets: [{
         label: 'Signals',
         data: [0, 0, 0, 0, 0],
-        backgroundColor: 'rgba(99, 102, 241, 0.4)',
+        backgroundColor: gradBar,
         borderColor: '#6366f1',
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderRadius: 4
       }]
     },
+
     options: {
       responsive: true,
       maintainAspectRatio: false,

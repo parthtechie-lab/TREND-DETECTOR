@@ -162,18 +162,18 @@ class AsyncClassifier:
             f"Return ONLY a JSON object matching this schema:\n{_JSON_SCHEMA}"
         )
 
-    def _ground_confidence(self, self_reported_confidence: float, source_count: int) -> float:
-        """Derives a physical confidence score grounded by corroboration count."""
-        confidence = self_reported_confidence
-        
-        # Boost slightly if the cluster is corroborated by multiple sources
-        if source_count > 1:
-            confidence = min(1.0, confidence * (1.0 + 0.1 * (source_count - 1)))
-        else:
-            # Penalize single-source signals slightly to prevent single-shot hallucinations
-            confidence = confidence * 0.9
-            
-        return round(confidence, 4)
+    def _ground_confidence(self, self_reported_confidence: float, source_count: float) -> float:
+      """Derives a physical confidence score grounded by corroboration index/source weight."""
+      confidence = self_reported_confidence
+      
+      # Boost slightly if the cluster is corroborated by strong sources (weight > 1.0)
+      if source_count > 1.0:
+          confidence = min(1.0, confidence * (1.0 + 0.1 * (source_count - 1.0)))
+      else:
+          # Penalize weak/single-source signals slightly to prevent single-shot hallucinations
+          confidence = confidence * 0.85
+          
+      return round(confidence, 4)
 
     async def classify(
         self,
@@ -181,8 +181,9 @@ class AsyncClassifier:
         body: str,
         url: str = "",
         cluster_id: str = "",
-        source_count: int = 1,
+        source_count: float = 1.0,
     ) -> ClassificationResult:
+
         """
         Classify a single item with self-correction retries and provider fallback.
         """

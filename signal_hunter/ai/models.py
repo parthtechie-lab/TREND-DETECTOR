@@ -103,7 +103,7 @@ class ScoredItem(BaseModel):
     body: str
     fetched_at: datetime
     corroborated: bool = False
-    source_count: int = 1
+    source_count: float = 1.0
 
     # Allow ORM-style attribute access for SQLAlchemy models (Pydantic v2 pattern).
     model_config = ConfigDict(from_attributes=True)

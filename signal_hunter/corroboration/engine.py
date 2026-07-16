@@ -21,34 +21,55 @@ logger = logging.getLogger(__name__)
 class CorroborationEngine:
     """Checks cross-source signal trends by evaluating a sliding time window."""
 
-    async def check_corroboration(self, cluster_id: str) -> Tuple[bool, int]:
-        """Verify if a cluster has enough distinct sources within the corroboration window.
+    async def check_corroboration(self, cluster_id: str) -> Tuple[bool, float]:
+        """Verify if a cluster has enough distinct sources within the corroboration window
+        using a Weighted Corroboration Index based on source authority.
 
         Returns:
-            A tuple of (is_corroborated, distinct_source_count)
+            A tuple of (is_corroborated, weighted_signal_strength)
         """
         cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
             hours=settings.CORROBORATION_WINDOW_HOURS
         )
 
+        # Authority weights: Product Hunt and HN represent direct high-signal launches,
+        # Reddit is solid general discussion, YouTube/TikTok are slightly more anecdotal.
+        SOURCE_WEIGHTS = {
+            "product_hunt": 1.5,
+            "hacker_news": 1.4,
+            "reddit": 1.0,
+            "youtube": 0.8,
+            "tiktok": 0.6,
+        }
+
         async with AsyncSessionLocal() as session:
             stmt = (
-                select(func.count(func.distinct(RawItem.source)))
+                select(RawItem.source)
                 .where(RawItem.cluster_id == cluster_id)
                 .where(RawItem.fetched_at >= cutoff)
+                .distinct()
             )
             result = await session.execute(stmt)
-            source_count = result.scalar() or 0
+            sources = result.scalars().all()
 
-        is_corroborated = source_count >= settings.CORROBORATION_MIN_SOURCES
+        if not sources:
+            return False, 0.0
+
+        # Calculate weighted signal strength index
+        weighted_score = sum(SOURCE_WEIGHTS.get(src, 1.0) for src in sources)
+        
+        # Corroborated if either we meet minimum source count, or cumulative authority weight >= 1.8
+        is_corroborated = len(sources) >= settings.CORROBORATION_MIN_SOURCES or weighted_score >= 1.8
+
         logger.debug(
-            "Cluster %s source count: %d (required: %d). Corroborated: %s",
+            "Cluster %s sources: %s, weighted score: %.2f. Corroborated: %s",
             cluster_id,
-            source_count,
-            settings.CORROBORATION_MIN_SOURCES,
+            sources,
+            weighted_score,
             is_corroborated,
         )
-        return is_corroborated, source_count
+        return is_corroborated, round(weighted_score, 2)
+
 
     async def get_cluster_sources(self, cluster_id: str) -> List[Dict[str, Any]]:
         """Fetch all raw items belonging to a specific cluster.

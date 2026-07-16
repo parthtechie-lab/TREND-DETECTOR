@@ -55,4 +55,4 @@ async def test_classifier_self_correction_flow():
         assert result.passed_validation is True
         assert result.output.evidence_quote == "Devin AI is releasing today"
         assert result.output.product_name == "Devin AI"
-        assert result.output.confidence == 0.855
+        assert result.output.confidence == 0.8075
