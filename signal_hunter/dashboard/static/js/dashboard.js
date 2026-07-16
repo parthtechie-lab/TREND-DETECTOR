@@ -252,6 +252,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const catEmoji = getCategoryEmoji(sig.category);
       const catBadge = `<span class="cat-badge ${getCategoryBadgeClass(sig.category)}">${catEmoji} ${sig.category}</span>`;
 
+      // Build verification reference search links
+      let refLinks = "";
+      if (sig.product_name) {
+        const query = encodeURIComponent(sig.product_name);
+        refLinks = `
+          <div class="ref-links" style="margin-top: 4px; display: flex; gap: 8px; font-size: 10px; opacity: 0.8;">
+            <a href="https://www.google.com/search?q=${query}" target="_blank" style="color: var(--c-primary); text-decoration: none; display: flex; align-items: center; gap: 2px;">
+              🔍 Google
+            </a>
+            <a href="https://x.com/search?q=${query}" target="_blank" style="color: var(--c-primary); text-decoration: none; display: flex; align-items: center; gap: 2px;">
+              🐦 X/Twitter
+            </a>
+            <a href="https://www.producthunt.com/search?q=${query}" target="_blank" style="color: var(--c-primary); text-decoration: none; display: flex; align-items: center; gap: 2px;">
+              😸 Product Hunt
+            </a>
+          </div>
+        `;
+      }
+
       // Sources
       const sourcesText = Array.isArray(sig.sources) ? sig.sources.join(", ") : sig.sources || "unknown";
       const sourceCount = sig.source_count || 1;
@@ -277,16 +296,19 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${confCell}</td>
         <td style="font-weight: 600; color: var(--c-text-1)">
           ${sig.url ? `<a href="${sig.url}" target="_blank" style="color: inherit; text-decoration: none; border-bottom: 1px dashed var(--c-border-2)">${prodName}</a>` : prodName}
+          ${refLinks}
         </td>
         <td>${catBadge}</td>
         <td>${sourceCell}</td>
         <td>${evidenceCell}</td>
         <td>${corroborationCell}</td>
         <td class="time-cell">${timeStr}</td>
+
       `;
       signalTbody.appendChild(tr);
     });
   }
+
 
   function renderSourceGrid(sources) {
     if (sources.length === 0) {
